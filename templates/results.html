@@ -17,17 +17,18 @@
         <a class="button-header" href="/Mockups">Mockups</a>
     </header>
     <div class="content">
-        <div class="main-header">Quiz</div>
-        <form action="{{url_for('addvalue')}}" method="post">
-            <input type="text" readonly style="border: none;font-size: 2vh; font-weight: 700;" value="" class="example" name="example">
-            <div>
-                <input type="number" class="input-answer" name = "answer">
-            </div>
-            <div>
-                <a href="/Mockups/Quiz?type=quiz"><button class="next-btn" type ="submit">Next</button></a>
-                <a href="/Mockups/Quiz?type=results"><button class="finish-btn" type="button" >Finish</button></a>
-            </div>
-        </form>
+        <div class="main-header">Quiz results</div>
+        <div style="font-size: 2vh;">Right answers
+             <span class="right-answers">{{right_answers[0]}}</span> 
+             out 
+             <span class="all-answers">{{all_answers[0]}}</span>
+             <ol class="answers">
+                {%for m in answers -%}
+                <li>{{m.example}} = {{m.answer}}</li>
+                {% endfor -%}
+             </ol>
+        </div>
+        
     </div>
     <div class="line"></div>
     
