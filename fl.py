@@ -11,13 +11,7 @@ id = 1
 @app.route("/")
 def main_page():
     global id
-    if request.cookies.get('id')==None:
-        resp = make_response(render_template('/home.html'))
-        resp.set_cookie('id',f"{id}")
-        id += 1
-        return resp
-    else:
-        return render_template('/home.html')
+    return render_template('/home.html')
 
 @app.route("/Mockups")
 def mockups():
@@ -25,23 +19,43 @@ def mockups():
 
 @app.route("/Mockups/Quiz", methods = ["POST","GET"])
 def addvalue():
+    global id
     if request.method == "POST":
         answer = request.form.get('answer')
         example = request.form.get('example')[:-1]
         db = get_db()
         db.cursor().execute("""INSERT INTO quiz(id,example,answer,correct) values(?,?,?,?)""", (request.cookies.get('id'),example,answer,eval(example)==int(answer)))
         db.commit()
-        db.close()
-        return render_template('./quiz.html')
-    if request.method == "GET":
-        if request.args.get('type') == 'quiz':
-            return render_template("./quiz.html")
-        else:
-            db = get_db()
-            return render_template("./results.html",
+        if request.form.get('check') == '1':
+            resp = make_response(render_template("./results.html",
                 answers = db.cursor().execute("""SELECT example,answer from quiz where id=?""",(request.cookies.get('id'),)).fetchall(),
                 right_answers = db.cursor().execute("""SELECT sum(correct) from quiz where id=?""",(request.cookies.get('id'),)).fetchone(),
-                all_answers = db.cursor().execute("""SELECT count(correct) from quiz where id=?""",(request.cookies.get('id'),)).fetchone())
+                all_answers = db.cursor().execute("""SELECT count(correct) from quiz where id=?""",(request.cookies.get('id'),)).fetchone()))
+            db.close()
+            return resp
+        db.close()
+        return render_template('./quiz.html')
+        
+
+    if request.method == "GET":
+        if request.cookies.get('id')==None:
+            resp = make_response(render_template('/home.html'))
+            resp.set_cookie('id',f"{id}")
+            id += 1
+
+        if request.args.get('type') == 'quiz':
+            resp = make_response(render_template("./quiz.html"))
+            resp.set_cookie('id',f'{id}')
+            id+=1
+            return resp
+        else:
+            db = get_db()
+            resp = make_response(render_template("./results.html",
+                answers = db.cursor().execute("""SELECT example,answer from quiz where id=?""",(request.cookies.get('id'),)).fetchall(),
+                right_answers = db.cursor().execute("""SELECT sum(correct) from quiz where id=?""",(request.cookies.get('id'),)).fetchone(),
+                all_answers = db.cursor().execute("""SELECT count(correct) from quiz where id=?""",(request.cookies.get('id'),)).fetchone()))
+            
+            return resp
     
 @app.teardown_appcontext
 def close_db(error):

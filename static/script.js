@@ -9,4 +9,8 @@ else{
 }
 document.addEventListener('DOMContentLoaded', function(){
     document.querySelector('.example').value = first_value +sign+ second_value+'='
+    document.querySelector('.finish-btn').onclick = function(){
+         document.querySelector('.check').value= '1'
+         console.log(document.querySelector('.check').value)
+    }
 })
